@@ -184,6 +184,14 @@ New File Uploaded to S3
 - Cloud data warehousing
 - Cross-platform integration
 
+## 🔮 Future Enhancements
+
+- Implement Infrastructure as Code (IaC) using Terraform to provision and manage AWS resources such as S3, EventBridge, Lambda, and IAM roles.
+- Make the pipeline dynamically process the specific file uploaded to the S3 raw zone.
+- Add automated data quality checks.
+- Implement monitoring and alerting for pipeline failures.
+- Add CI/CD for automated DAG deployment.
+
 ## 👩‍💻 Author
 
 **Thara Mathew**

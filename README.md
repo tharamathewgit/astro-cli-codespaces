@@ -1,45 +1,179 @@
-# An Astro project to run within GitHub Codespaces
+# 🚕 Event-Driven NYC Taxi Data Pipeline
 
-Welcome to [Astronomer](astronomer.io)! :rocket:
+An end-to-end event-driven data engineering pipeline that processes NYC Taxi trip data using Databricks, Apache Airflow, AWS, and Snowflake.
 
-This repository is an Astro project, a local [Apache Airflow](https://airflow.apache.org/) project created with the OSS [Astro CLI](https://docs.astronomer.io/astro/cli/overview), that you can run within GitHub codespaces. You can fork this repository to develop your own Apache Airflow projects without the need for any local setup.
+## 📌 Project Overview
 
-## Setting up
+This project demonstrates an automated cloud-based data pipeline.
 
-Run this Airflow project without installing anything locally.
+When a new file is uploaded to the `raw/` folder in Amazon S3:
 
-1. Fork this repository.
-2. Create a new GitHub codespaces project on your fork by clicking **...** and **New with options**. Make sure it uses at least 4 cores!
+1. Amazon EventBridge detects the S3 Object Created event.
+2. EventBridge invokes an AWS Lambda function.
+3. Lambda authenticates with Apache Airflow and triggers the `taxi_pipeline` DAG.
+4. Airflow orchestrates the Databricks ETL workflow.
+5. Transformed data is loaded into Snowflake.
 
-    ![Fork repo and create a codespaces project](src/fork_codespaces.png)
+## 🏗️ Architecture
 
-    ![Ensure codespaces uses at least 4 cores](src/ensure_4_cores.png)
+```text
+NYC Taxi Data
+      │
+      ▼
+Amazon S3 (Raw Zone)
+      │
+      │ Object Created Event
+      ▼
+Amazon EventBridge
+      │
+      ▼
+AWS Lambda
+      │
+      │ Trigger DAG
+      ▼
+Apache Airflow
+      │
+      ▼
+Databricks (PySpark ETL)
+      │
+      ▼
+Amazon S3 (Staging)
+      │
+      ▼
+Snowflake
+```
 
-3. Wait for the codespaces project to start. Once it has started, open a new terminal and run the following command:
+## ⚙️ Technologies Used
 
-    ```bash
-    astro dev start
-    ```
+- Amazon S3
+- Amazon EventBridge
+- AWS Lambda
+- Apache Airflow
+- Astro CLI
+- GitHub Codespaces
+- Databricks
+- PySpark
+- Snowflake
+- Python
+- Git & GitHub
 
-4. Once the Airflow project has started access the Airflow UI by clicking on the **Ports** tab and opening the forward URL for port 8080.
+## 🔄 Pipeline Workflow
 
-    ![Open Airflow UI URL Codespaces](src/open_ui.png)
+### 1. Raw Data Ingestion
 
-5. Log in to the Airflow UI using the credentials `admin` and `admin`.
+NYC Taxi trip data is stored in the Amazon S3 raw zone:
 
-    ![Log in to Airflow UI](src/login.png)
+```text
+s3://taxi-pipeline-thara-2026/raw/
+```
 
-6. You can now start developing your Airflow project within GitHub codespaces! Run DAGs by toggling them on in the Airflow UI and clicking the Run arrow. There is one example DAG in the `dags` folder that you can run out of the box.
+### 2. Event Detection
 
-    ![Run DAGs in Airflow UI](src/run_dags.png)
+Amazon EventBridge listens for S3 `Object Created` events where the object key begins with:
 
+```text
+raw/
+```
 
-## Resources
+### 3. AWS Lambda
 
-- [ask.astronomer.io](ask.astronomer.io) - Airflow + Astro knowledgeable chat application (free, OSS)
-- [registry.astronomer.io](registry.astronomer.io)  - All you need to know about modules and providers (free)
-- Cloud IDE - Notebook-style DAG writing, with AI✨ (free trial: [astronomer.io/try-astro](https://www.astronomer.io/try-astro))
-- [Astro CLI Docs](https://docs.astronomer.io/astro/cli/overview) - The easiest way to run Airflow locally (free, OSS)
-- [Astronomer Learn](https://docs.astronomer.io/learn) - Many Airflow guides and tutorials (free)
-- [Astronomer Events](https://astronomer.io/events) - Add to your calendar to never miss an event/webinar (free)
-- [Airflow Slack](apache-airflow-slack.herokuapp.com) - The best place to ask Airflow questions (free)
+The Lambda function:
+
+- Receives the S3 event
+- Extracts the bucket name and object key
+- Authenticates with Apache Airflow
+- Triggers the `taxi_pipeline` DAG
+- Passes the uploaded file information to the DAG
+
+### 4. Apache Airflow Orchestration
+
+The `taxi_pipeline` DAG orchestrates:
+
+1. Databricks ETL processing
+2. Loading dimension tables into Snowflake
+3. Loading the fact table into Snowflake
+
+### 5. Databricks Transformation
+
+Databricks processes the NYC Taxi data using PySpark and generates:
+
+- `dim_payment`
+- `dim_rate`
+- `dim_date`
+- `fact_trips`
+
+The transformed data is stored in the S3 staging layer.
+
+### 6. Snowflake Data Warehouse
+
+The transformed dimension and fact tables are loaded into Snowflake for analytics.
+
+## 📊 Data Model
+
+### Dimension Tables
+
+| Table | Description |
+|---|---|
+| `DIM_PAYMENT` | Payment type information |
+| `DIM_RATE` | Rate code information |
+| `DIM_DATE` | Date-related attributes |
+
+### Fact Table
+
+| Table | Description |
+|---|---|
+| `FACT_TRIPS` | NYC Taxi trip data |
+
+## 📁 Project Structure
+
+```text
+.
+├── dags/
+│   └── taxi_pipeline.py
+├── Dockerfile
+├── requirements.txt
+├── packages.txt
+└── README.md
+```
+
+## 🚀 Event-Driven Flow
+
+```text
+New File Uploaded to S3
+          │
+          ▼
+    EventBridge
+          │
+          ▼
+      AWS Lambda
+          │
+          ▼
+   Airflow DAG Trigger
+          │
+          ▼
+   Databricks PySpark ETL
+          │
+          ▼
+      S3 Staging
+          │
+          ▼
+       Snowflake
+```
+
+## 🎯 Key Concepts Demonstrated
+
+- Event-driven architecture
+- Cloud-based ETL pipelines
+- Workflow orchestration
+- Serverless computing
+- Distributed data processing
+- Data lake architecture
+- Star schema modeling
+- Cloud data warehousing
+- Cross-platform integration
+
+## 👩‍💻 Author
+
+**Thara Mathew**
+
+Data Engineer
